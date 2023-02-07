@@ -2,10 +2,10 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {ScamToken} from "../src/ScamToken.sol";
+import {ScamToken} from "src/ScamToken.sol";
 
 contract ScamTokenTest is Test {
-    ScamToken public token;
+    ScamToken internal token;
 
     function setUp() public {
         token = new ScamToken(20);
@@ -17,8 +17,9 @@ contract ScamTokenTest is Test {
     }
 
     function testTransfer() public {
-        token.transfer(msg.sender, 10);
-        assertEq(token.balanceOf(msg.sender), 10);
+        address user = makeAddr("user");
+        token.transfer(user, 10);
+        assertEq(token.balanceOf(user), 10);
         assertEq(token.balanceOf(address(this)), 10);
     }
 }
