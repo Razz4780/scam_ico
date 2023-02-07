@@ -33,15 +33,21 @@ contract ScamICO {
 
     // User can fund this ICO using this function.
     function fund(uint256 amount) external {
-        require(missing > 0);
+        if (missing == 0) {
+            return;
+        }
 
         if (amount >= missing) {
             amount = missing;
         }
 
         fundsToken.transferFrom(msg.sender, address(this), amount);
-        funds[msg.sender] += amount;
-        missing -= amount;
+        unchecked {
+            // ERC20 transfer passed.
+            funds[msg.sender] += amount;
+            // Amount was adjusted above.
+            missing -= amount;
+        }
 
         if (missing == 0) {
             claimableFrom = block.timestamp + claimableDelay;
@@ -49,23 +55,22 @@ contract ScamICO {
     }
 
     // This modifier passes only when the ICO has ended and tokens are claimable.
-    modifier WhenClaimable() {
+    modifier OnlyWhenClaimable() {
         require(missing == 0);
         require(claimableFrom <= block.timestamp);
         _;
     }
 
     // User can claim their reward with this function.
-    function claimReward() external WhenClaimable {
-        uint256 reward = funds[msg.sender];
-        rewardsToken.transfer(msg.sender, reward);
+    function claimReward(uint256 amount) external OnlyWhenClaimable {
+        funds[msg.sender] -= amount;
+        rewardsToken.transfer(msg.sender, amount);
     }
 
     // The owner can claim funds with this function.
-    function claimFunds() external WhenClaimable {
+    function claimFunds(uint256 amount) external OnlyWhenClaimable {
         require(msg.sender == owner);
 
-        uint256 balance = fundsToken.balanceOf(address(this));
-        fundsToken.transfer(msg.sender, balance);
+        fundsToken.transfer(msg.sender, amount);
     }
 }

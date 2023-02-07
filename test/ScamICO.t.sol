@@ -34,12 +34,12 @@ contract ScamICOTest is Test {
         skip(100);
 
         vm.prank(user);
-        ico.claimReward();
+        ico.claimReward(15);
 
         assertEq(rewardsToken.balanceOf(user), 15);
         assertEq(rewardsToken.balanceOf(address(ico)), 0);
 
-        ico.claimFunds();
+        ico.claimFunds(15);
 
         assertEq(fundsToken.balanceOf(address(this)), 15);
         assertEq(fundsToken.balanceOf(address(ico)), 0);
@@ -69,15 +69,15 @@ contract ScamICOTest is Test {
         skip(100);
 
         vm.prank(user1);
-        ico.claimReward();
+        ico.claimReward(10);
         vm.prank(user2);
-        ico.claimReward();
+        ico.claimReward(5);
 
         assertEq(rewardsToken.balanceOf(user1), 10);
         assertEq(rewardsToken.balanceOf(user2), 5);
         assertEq(rewardsToken.balanceOf(address(ico)), 0);
 
-        ico.claimFunds();
+        ico.claimFunds(15);
 
         assertEq(fundsToken.balanceOf(address(this)), 15);
         assertEq(fundsToken.balanceOf(address(ico)), 0);
@@ -96,7 +96,7 @@ contract ScamICOTest is Test {
 
         vm.prank(user);
         vm.expectRevert();
-        ico.claimFunds();
+        ico.claimFunds(15);
     }
 
     function testCannotClaimToEarly() public {
@@ -105,35 +105,55 @@ contract ScamICOTest is Test {
 
         vm.expectRevert();
         vm.prank(user);
-        ico.claimReward();
+        ico.claimReward(15);
         vm.expectRevert();
-        ico.claimFunds();
+        ico.claimFunds(15);
 
         vm.startPrank(user);
         fundsToken.approve(address(ico), 15);
         ico.fund(15);
         skip(50);
         vm.expectRevert();
-        ico.claimReward();
+        ico.claimReward(15);
         vm.stopPrank();
         vm.expectRevert();
-        ico.claimFunds();
+        ico.claimFunds(15);
 
         skip(50);
 
         vm.prank(user);
-        ico.claimReward();
-        ico.claimFunds();
+        ico.claimReward(15);
+        ico.claimFunds(15);
     }
 
-    function testCannotFundAfterEnd() public {
+    function testFundAfterEndDoesNothing() public {
         address user = makeAddr("user");
         fundsToken.transfer(user, 20);
 
         vm.startPrank(user);
         fundsToken.approve(address(ico), 15);
         ico.fund(15);
-        vm.expectRevert();
         ico.fund(5);
+
+        assertEq(fundsToken.balanceOf(user), 5);
+        assertEq(ico.funds(user), 15);
+    }
+
+    function testCannotOverClaim() public {
+        address user = makeAddr("user");
+        fundsToken.transfer(user, 20);
+
+        vm.startPrank(user);
+        fundsToken.approve(address(ico), 15);
+        ico.fund(15);
+        vm.stopPrank();
+
+        skip(100);
+
+        vm.expectRevert();
+        vm.prank(user);
+        ico.claimReward(16);
+        vm.expectRevert();
+        ico.claimFunds(16);
     }
 }
