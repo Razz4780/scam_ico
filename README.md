@@ -18,7 +18,7 @@ Deploys the ScamICO contract. Configuration:
 2. `REWARDS_TOKEN` - address of the ERC20 token in which rewards are payed.
 3. `TARGET` - target amount of funding.
 4. `CLAIMABLE_DELAY` - required number of seconds between ICO end and claiming.
-5. `RATIO` - amount of rewards token each user will get for each funding token given.
+5. `RATIO` - amount of rewards tokens each user will get for each funding token given.
 
 ## DeployScamToken:DeployScamTokenScript
 Deploys the ScamToken contract. Configuration:
@@ -36,3 +36,13 @@ Claims reward from the ScamICO contract. Configuration:
 ## ScamICOInteractions:ScamICOClaimFundsScript
 Claims funds from the ScamICO contract. This can be done only by the ICO creator. Configuration:
 1. `ICO_ADDRESS` - address of the ICO contract.
+
+## ScamICOInteractions:ScamICOReadStateScript
+Prints current state of the ScamICO contract. Configuration:
+1. `ICO_ADDRESS` - address of the ICO contract.
+
+## ScamICOInteractions:ScamICOAddRewardsScript
+Transfers rewards to the ScamICO contract. Configuration:
+1. `ICO_ADDRESS` - address of the ICO contract.
+2. `TARGET` - target amount of funding.
+3. `RATIO` - amount of rewards tokens each user will get for each funding token given.
