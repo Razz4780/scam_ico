@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ERC20} from "solmate/tokens/ERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+
+using SafeERC20 for IERC20;
 
 contract ScamICO {
     // Owner of this ICO.
@@ -11,9 +14,9 @@ contract ScamICO {
     uint256 public immutable ratio;
 
     // Users can fund this ICO with this token.
-    ERC20 public immutable fundsToken;
+    IERC20 public immutable fundsToken;
     // Users get rewarded from this ICO with this token.
-    ERC20 public immutable rewardsToken;
+    IERC20 public immutable rewardsToken;
 
     // This ICO needs this much of funding to end.
     uint256 public missing;
@@ -26,7 +29,7 @@ contract ScamICO {
     // This is set when this ICO ends.
     uint256 public claimableFrom;
 
-    constructor(ERC20 _fundsToken, ERC20 _rewardsToken, uint256 target, uint256 _claimableDelay, uint256 _ratio) {
+    constructor(IERC20 _fundsToken, IERC20 _rewardsToken, uint256 target, uint256 _claimableDelay, uint256 _ratio) {
         owner = msg.sender;
         fundsToken = _fundsToken;
         rewardsToken = _rewardsToken;
@@ -45,7 +48,7 @@ contract ScamICO {
             amount = missing;
         }
 
-        fundsToken.transferFrom(msg.sender, address(this), amount);
+        fundsToken.safeTransferFrom(msg.sender, address(this), amount);
         unchecked {
             // ERC20 transfer passed.
             funds[msg.sender] += amount;
@@ -69,7 +72,7 @@ contract ScamICO {
     function claimReward() external OnlyWhenClaimable {
         uint256 amount = funds[msg.sender];
         delete(funds[msg.sender]);
-        rewardsToken.transfer(msg.sender, amount * ratio);
+        rewardsToken.safeTransfer(msg.sender, amount * ratio);
     }
 
     // The owner can claim funds with this function.
@@ -77,6 +80,6 @@ contract ScamICO {
         require(msg.sender == owner);
 
         uint256 amount = fundsToken.balanceOf(address(this));
-        fundsToken.transfer(msg.sender, amount);
+        fundsToken.safeTransfer(msg.sender, amount);
     }
 }
