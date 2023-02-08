@@ -5,13 +5,14 @@ import {Test} from "forge-std/Test.sol";
 import {DeployScamTokenScript} from "script/DeployScamToken.s.sol";
 import {ScamToken} from "src/ScamToken.sol";
 
-contract ScamICOTest is Test {
+contract DeployScamTokenTest is Test {
     function testDeploy() public {
-        DeployScamTokenScript script = new DeployScamTokenScript();
-        ScamToken token = script.run(20);
-        assertEq(token.totalSupply(), 20);
+        vm.setEnv("TOTAL_SUPPLY", "20");
 
-        address deployerAddress = vm.envAddress("TEST_ADDRESS");
-        assertEq(token.balanceOf(deployerAddress), 20);
+        DeployScamTokenScript script = new DeployScamTokenScript();
+        ScamToken token = script.run();
+
+        assertEq(token.totalSupply(), 20);
+        assertEq(token.balanceOf(address(this)), 20);
     }
 }

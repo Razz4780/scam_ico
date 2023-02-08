@@ -19,6 +19,7 @@ contract ScamTokenTest is Test {
     function testTransfer() public {
         address user = makeAddr("user");
         token.transfer(user, 10);
+
         assertEq(token.balanceOf(user), 10);
         assertEq(token.balanceOf(address(this)), 10);
     }
