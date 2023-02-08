@@ -7,6 +7,9 @@ contract ScamICO {
     // Owner of this ICO.
     address public immutable owner;
 
+    // Amount of rewards tokens users get for each funds token given.
+    uint256 public immutable ratio;
+
     // Users can fund this ICO with this token.
     ERC20 public immutable fundsToken;
     // Users get rewarded from this ICO with this token.
@@ -23,12 +26,13 @@ contract ScamICO {
     // This is set when this ICO ends.
     uint256 public claimableFrom;
 
-    constructor(ERC20 _fundsToken, ERC20 _rewardsToken, uint256 target, uint256 _claimableDelay) {
+    constructor(ERC20 _fundsToken, ERC20 _rewardsToken, uint256 target, uint256 _claimableDelay, uint256 _ratio) {
         owner = msg.sender;
         fundsToken = _fundsToken;
         rewardsToken = _rewardsToken;
         missing = target;
         claimableDelay = _claimableDelay;
+        ratio = _ratio;
     }
 
     // User can fund this ICO using this function.
@@ -62,15 +66,17 @@ contract ScamICO {
     }
 
     // User can claim their reward with this function.
-    function claimReward(uint256 amount) external OnlyWhenClaimable {
-        funds[msg.sender] -= amount;
-        rewardsToken.transfer(msg.sender, amount);
+    function claimReward() external OnlyWhenClaimable {
+        uint256 amount = funds[msg.sender];
+        delete(funds[msg.sender]);
+        rewardsToken.transfer(msg.sender, amount * ratio);
     }
 
     // The owner can claim funds with this function.
-    function claimFunds(uint256 amount) external OnlyWhenClaimable {
+    function claimFunds() external OnlyWhenClaimable {
         require(msg.sender == owner);
 
+        uint256 amount = fundsToken.balanceOf(address(this));
         fundsToken.transfer(msg.sender, amount);
     }
 }

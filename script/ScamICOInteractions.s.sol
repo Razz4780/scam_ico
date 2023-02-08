@@ -27,18 +27,14 @@ contract ScamICOFundScript is ScamICOInteractionScript {
 
 contract ScamICOClaimRewardScript is ScamICOInteractionScript {
     function run() public {
-        uint256 amount = vm.envUint("CLAIM_REWARD_AMOUNT");
-
         vm.broadcast(msg.sender);
-        ico.claimReward(amount);
+        ico.claimReward();
     }
 }
 
 contract ScamICOClaimFundsScript is ScamICOInteractionScript {
     function run() public {
-        uint256 amount = vm.envUint("CLAIM_FUNDS_AMOUNT");
-
         vm.broadcast(msg.sender);
-        ico.claimFunds(amount);
+        ico.claimFunds();
     }
 }

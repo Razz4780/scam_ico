@@ -11,10 +11,10 @@ contract ScamICOTest is Test {
     ScamICO internal ico;
 
     function setUp() public {
-        rewardsToken = new ScamToken(15);
+        rewardsToken = new ScamToken(30);
         fundsToken = new ScamToken(20);
-        ico = new ScamICO(fundsToken, rewardsToken, 15, 100);
-        rewardsToken.transfer(address(ico), 15);
+        ico = new ScamICO(fundsToken, rewardsToken, 15, 100, 2);
+        rewardsToken.transfer(address(ico), 30);
     }
 
     function testOneShot() public {
@@ -34,12 +34,12 @@ contract ScamICOTest is Test {
         skip(100);
 
         vm.prank(user);
-        ico.claimReward(15);
+        ico.claimReward();
 
-        assertEq(rewardsToken.balanceOf(user), 15);
+        assertEq(rewardsToken.balanceOf(user), 30);
         assertEq(rewardsToken.balanceOf(address(ico)), 0);
 
-        ico.claimFunds(15);
+        ico.claimFunds();
 
         assertEq(fundsToken.balanceOf(address(this)), 15);
         assertEq(fundsToken.balanceOf(address(ico)), 0);
@@ -69,15 +69,15 @@ contract ScamICOTest is Test {
         skip(100);
 
         vm.prank(user1);
-        ico.claimReward(10);
+        ico.claimReward();
         vm.prank(user2);
-        ico.claimReward(5);
+        ico.claimReward();
 
-        assertEq(rewardsToken.balanceOf(user1), 10);
-        assertEq(rewardsToken.balanceOf(user2), 5);
+        assertEq(rewardsToken.balanceOf(user1), 20);
+        assertEq(rewardsToken.balanceOf(user2), 10);
         assertEq(rewardsToken.balanceOf(address(ico)), 0);
 
-        ico.claimFunds(15);
+        ico.claimFunds();
 
         assertEq(fundsToken.balanceOf(address(this)), 15);
         assertEq(fundsToken.balanceOf(address(ico)), 0);
@@ -96,7 +96,7 @@ contract ScamICOTest is Test {
 
         vm.prank(user);
         vm.expectRevert();
-        ico.claimFunds(15);
+        ico.claimFunds();
     }
 
     function testCannotClaimToEarly() public {
@@ -105,25 +105,25 @@ contract ScamICOTest is Test {
 
         vm.expectRevert();
         vm.prank(user);
-        ico.claimReward(15);
+        ico.claimReward();
         vm.expectRevert();
-        ico.claimFunds(15);
+        ico.claimFunds();
 
         vm.startPrank(user);
         fundsToken.approve(address(ico), 15);
         ico.fund(15);
         skip(50);
         vm.expectRevert();
-        ico.claimReward(15);
+        ico.claimReward();
         vm.stopPrank();
         vm.expectRevert();
-        ico.claimFunds(15);
+        ico.claimFunds();
 
         skip(50);
 
         vm.prank(user);
-        ico.claimReward(15);
-        ico.claimFunds(15);
+        ico.claimReward();
+        ico.claimFunds();
     }
 
     function testFundAfterEndDoesNothing() public {
@@ -140,20 +140,43 @@ contract ScamICOTest is Test {
     }
 
     function testCannotOverClaim() public {
-        address user = makeAddr("user");
-        fundsToken.transfer(user, 20);
+        address user1 = makeAddr("user1");
+        address user2 = makeAddr("user2");
+        fundsToken.transfer(user1, 10);
+        fundsToken.transfer(user2, 5);
 
-        vm.startPrank(user);
-        fundsToken.approve(address(ico), 15);
-        ico.fund(15);
+        vm.startPrank(user1);
+
+        fundsToken.approve(address(ico), 10);
+        ico.fund(10);
+
+        changePrank(user2);
+
+        fundsToken.approve(address(ico), 5);
+        ico.fund(5);
+
         vm.stopPrank();
 
         skip(100);
 
-        vm.expectRevert();
-        vm.prank(user);
-        ico.claimReward(16);
-        vm.expectRevert();
-        ico.claimFunds(16);
+        vm.startPrank(user1);
+
+        ico.claimReward();
+        assertEq(rewardsToken.balanceOf(address(ico)), 10);
+        assertEq(rewardsToken.balanceOf(user1), 20);
+        ico.claimReward();
+        assertEq(rewardsToken.balanceOf(address(ico)), 10);
+        assertEq(rewardsToken.balanceOf(user1), 20);
+
+        changePrank(user2);
+
+        ico.claimReward();
+        assertEq(rewardsToken.balanceOf(address(ico)), 0);
+        assertEq(rewardsToken.balanceOf(user2), 10);
+        ico.claimReward();
+        assertEq(rewardsToken.balanceOf(address(ico)), 0);
+        assertEq(rewardsToken.balanceOf(user2), 10);
+
+        vm.stopPrank();
     }
 }

@@ -11,9 +11,10 @@ contract DeployScamICOScript is Script {
         ERC20 rewardsToken = ERC20(vm.envAddress("REWARDS_TOKEN"));
         uint256 target = vm.envUint("TARGET");
         uint256 claimableDelay = vm.envUint("CLAIMABLE_DELAY");
+        uint256 ratio = vm.envUint("RATIO");
 
         vm.broadcast(msg.sender);
-        ScamICO ico = new ScamICO(fundsToken, rewardsToken, target, claimableDelay);
+        ScamICO ico = new ScamICO(fundsToken, rewardsToken, target, claimableDelay, ratio);
 
         return ico;
     }

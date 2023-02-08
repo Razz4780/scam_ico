@@ -11,9 +11,9 @@ contract SCMICOInteractionsTest is Test {
 
     function setUp() public {
         ScamToken fundsToken = new ScamToken(20);
-        ScamToken rewardsToken = new ScamToken(20);
-        ico = new ScamICO(fundsToken, rewardsToken, 20, 120);
-        rewardsToken.transfer(address(ico), 20);
+        ScamToken rewardsToken = new ScamToken(40);
+        ico = new ScamICO(fundsToken, rewardsToken, 20, 120, 2);
+        rewardsToken.transfer(address(ico), 40);
 
         vm.setEnv("ICO_ADDRESS", vm.toString(address(ico)));
     }
@@ -29,8 +29,6 @@ contract SCMICOInteractionsTest is Test {
     }
 
     function testClaimReward() public {
-        vm.setEnv("CLAIM_REWARD_AMOUNT", "20");
-
         ico.fundsToken().approve(address(ico), 20);
         ico.fund(20);
         skip(120);
@@ -39,12 +37,10 @@ contract SCMICOInteractionsTest is Test {
         script.setUp();
         script.run();
 
-        assertEq(ico.rewardsToken().balanceOf(address(this)), 20);
+        assertEq(ico.rewardsToken().balanceOf(address(this)), 40);
     }
 
     function testClaimFunds() public {
-        vm.setEnv("CLAIM_FUNDS_AMOUNT", "20");
-
         ico.fundsToken().approve(address(ico), 20);
         ico.fund(20);
         skip(120);

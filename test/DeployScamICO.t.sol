@@ -15,6 +15,7 @@ contract DeployScamICOTest is Test {
         vm.setEnv("REWARDS_TOKEN", vm.toString(address(rewardsToken)));
         vm.setEnv("TARGET", "20");
         vm.setEnv("CLAIMABLE_DELAY", "120");
+        vm.setEnv("RATIO", "10");
 
         DeployScamICOScript script = new DeployScamICOScript();
         ScamICO ico = script.run();
