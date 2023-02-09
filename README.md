@@ -1,8 +1,10 @@
+This is just a Solidity playground :)
+
 # Contracts
 
 ## ScamICO
 
-This is a Solidity playground project. The contract is a simple ICO contract. Users can participate in the ICO through transferring a specified ERC20 tokens to the contract. Once the target amount is raised, the sale is over. After specified time has passed, users can claim their rewards (in other specified ERC20 token).
+A simple ICO contract. Users can participate in the ICO through transferring a specified ERC20 tokens to the contract. Once the target amount is raised, the sale is over. After specified time has passed, users can claim their rewards (in other specified ERC20 token).
 
 ## ScamToken
 
